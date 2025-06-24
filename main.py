@@ -1,14 +1,23 @@
 from emisor import Emisor
 from receptor import Receptor
 import asyncio
+from kernel import CommunicationManager
 
-async def main():
-    atob = asyncio.Queue()
-    btoa = asyncio.Queue()
-    e = Emisor("jose manuel", 5, atob, btoa)
-    r = Receptor(5, atob, btoa)
-    tareaEmisor = asyncio.create_task(e.run())
-    tareaReceptor = asyncio.create_task(r.run())
-    await asyncio.gather(tareaEmisor, tareaReceptor)
+async def run_client():
+    comm = CommunicationManager(mode="client", host="192.168.1.42", port=8888)
+    await comm.start()
 
-asyncio.run(main())
+    await comm.send("Hello from A!")
+    response = await comm.receive()
+    print("[A] Got:", response)
+
+    await comm.close()
+
+async def run_server():
+    server = Emisor("hola mundo", 10, '127.0.0.0', 8888)
+    await server.start()
+
+if input("Run server? (y/n): ").strip().lower() == 'y':
+    asyncio.run(run_server())
+else:
+    asyncio.run(run_client())

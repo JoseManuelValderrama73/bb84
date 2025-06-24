@@ -55,3 +55,52 @@ class Qbit():
             return eje, self.valor
         else:
             return eje, random.choice([0, 1])
+
+import asyncio
+class CommunicationManager:
+    def __init__(self, mode, host='127.0.0.1', port=8888):
+        self.mode = mode  # "client" or "server"
+        self.host = host
+        self.port = port
+        self.reader = None
+        self.writer = None
+
+    async def start(self):
+        if self.mode == "server":
+            server = await asyncio.start_server(self.handle_client, self.host, self.port)
+            print(f"[SERVER] Listening on {self.host}:{self.port}")
+            async with server:
+                await server.serve_forever()
+        elif self.mode == "client":
+            self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
+            print(f"[CLIENT] Connected to {self.host}:{self.port}")
+
+    async def handle_client(self, reader, writer):
+        self.reader = reader
+        self.writer = writer
+        print(f"[SERVER] Client connected.")
+        await self.on_ready()  # calls a hook for user code
+
+    async def send(self, msg: str):
+        if self.writer is None:
+            raise RuntimeError("Writer not initialized.")
+        self.writer.write((msg + "\n").encode())
+        await self.writer.drain()
+
+    async def receive(self) -> str:
+        if self.reader is None:
+            raise RuntimeError("Reader not initialized.")
+        data = await self.reader.readline()
+        return data.decode().strip()
+
+    async def close(self):
+        if self.writer:
+            self.writer.close()
+            await self.writer.wait_closed()
+
+    async def on_ready(self):
+        """
+        Hook: override this in subclass or assign externally
+        Called when connection is ready (for server)
+        """
+        pass

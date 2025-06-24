@@ -1,13 +1,17 @@
 from kernel import *
 
-class Emisor():
-    def __init__(self, msg: str, N: int, atob, btoa):
+class Emisor(CommunicationManager):
+    def __init__(self, msg: str, N: int, host: str, port: int):
+        CommunicationManager.__init__(self, 'server', host, port)
         self.msg = msg
         self.N = N
         self.mapaQbits = []
-        self.atob = atob
-        self.btoa = btoa
     
+    async def on_ready(self):
+        msg = await self.receive()
+        print("[B] Received:", msg)
+        await self.send("Hello from B!")
+
     async def run(self):
         numQbits = len(self.msg) * N_BITS_FACTOR
         qbits = self.generarQbits(numQbits)
