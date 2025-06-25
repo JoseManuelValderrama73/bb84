@@ -92,7 +92,7 @@ class CommunicationManager:
         self.reader = reader
         self.writer = writer
         print(f"[SERVER] Client connected.")
-        await self.on_ready()
+        await self.run()
 
     async def send(self, data):
         if self.writer is None:
@@ -105,7 +105,7 @@ class CommunicationManager:
         elif isinstance(data, list):
             if all(isinstance(x, int) for x in data):
                 msg = {"type": "int_list", "data": data}
-            elif all(isinstance(x, Qubit) for x in data):
+            elif all(isinstance(x, Qbit) for x in data):
                 msg = {"type": "qbit_list", "data": [q.to_dict() for q in data]}
             else:
                 raise ValueError("Unsupported list content")
@@ -133,7 +133,7 @@ class CommunicationManager:
         elif t == "int_list":
             return list(d)
         elif t == "qbit_list":
-            return [Qubit.from_dict(q) for q in d]
+            return [Qbit.from_dict(q) for q in d]
         else:
             raise ValueError(f"Unknown message type: {t}")
 
