@@ -10,7 +10,7 @@ class Cifrado():
 
     def cifrar(self, msg: str) -> bytes:
         if len(self.bit_key) < len(msg) * 8:
-            raise ValueError("Key too short for message")
+            raise ValueError('Clave demasiado corta')
         
         message_bits = ''.join(f"{ord(c):08b}" for c in msg)
         ciphertext_bits = ''.join(
@@ -24,7 +24,7 @@ class Cifrado():
 
     def descifrar(self, ciphertext: str) -> str:
         if len(self.bit_key) < len(ciphertext) * 8:
-            raise ValueError("Key too short for ciphertext")
+            raise ValueError('Clave demasiado corta')
 
         # Convert bytes to binary string
         ciphertext_bits = ''.join(f"{byte:08b}" for byte in ciphertext)
@@ -43,9 +43,6 @@ class Qbit():
         self.valor = valor
 
     def leer(self, eje: int) -> tuple:
-        if (self.eje is None) or (self.valor is None):
-            raise Exception("Qbit no generado")
-
         if self.eje == eje:
             return eje, self.valor
         else:
@@ -58,13 +55,9 @@ class Qbit():
     def from_dict(data):
         return Qbit(data['eje'], data['valor'])
 
-    def __repr__(self):
-        return f"Qubit(valor={self.valor}, eje='{self.eje}')"
-
 import asyncio
 import json
 import base64
-
 class CommunicationManager:
     def __init__(self, mode, host, port):
         self.mode = mode
@@ -76,17 +69,17 @@ class CommunicationManager:
     async def start(self):
         if self.mode == "server":
             server = await asyncio.start_server(self.handle_client, self.host, self.port)
-            print(f"[SERVER] Listening on {self.host}:{self.port}")
+            print(f"Escuchando en {self.host}:{self.port}")
             async with server:
                 await server.serve_forever()
         elif self.mode == "client":
             self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
-            print(f"[CLIENT] Connected to {self.host}:{self.port}")
+            print(f"Enviando mensaje a {self.host}:{self.port} ...")
 
     async def handle_client(self, reader, writer):
         self.reader = reader
         self.writer = writer
-        print(f"[SERVER] Client connected.")
+        print(f"Recibiendo mensaje ...")
         await self.run()
 
     async def send(self, data):
@@ -109,7 +102,7 @@ class CommunicationManager:
             b64_data = base64.b64encode(data).decode("ascii")
             msg = {"type": "bytes", "data": b64_data}
         else:
-            raise ValueError("Unsupported data type for send()")
+            raise ValueError("Tipo de dato no soportado para enviar")
 
         serialized = json.dumps(msg) + "\n"
         self.writer.write(serialized.encode())
@@ -136,7 +129,7 @@ class CommunicationManager:
         elif t == "bytes":
             return base64.b64decode(d.encode("ascii"))
         else:
-            raise ValueError(f"Unknown message type: {t}")
+            raise ValueError(f"Tipo de mensaje desconocido: {t}")
 
     async def close(self):
         if self.writer:
@@ -144,5 +137,6 @@ class CommunicationManager:
             await self.writer.wait_closed()
 
     async def run(self):
-        """Override in subclass or assign externally to define what happens on connect."""
         pass
+
+def printerr(err: str): print(f"\033[31m{err}\033[0m")

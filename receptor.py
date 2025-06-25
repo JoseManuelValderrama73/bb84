@@ -26,9 +26,12 @@ class Receptor(CommunicationManager):
             msg_cif = await self.receive()
             valores = [tupla[1] for tupla in self.mapaQbits]
             c = Cifrado(valores)
-            msg = c.descifrar(msg_cif)
+            try:
+                msg = c.descifrar(msg_cif)
+                self.tratarMensaje(msg)
+            except ValueError as e:
+                printerr(f"Error al descifrar el mensaje: {e}")
 
-        self.tratarMensaje(msg)
 
     async def salir(self):
         await self.close()

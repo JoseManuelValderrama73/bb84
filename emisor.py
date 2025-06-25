@@ -9,6 +9,7 @@ class Emisor(CommunicationManager):
 
     async def run(self):
         await self.start()
+
         await self.send(self.N)
 
         numQbits = len(self.msg) * N_BITS_FACTOR
@@ -28,10 +29,16 @@ class Emisor(CommunicationManager):
             await self.send(VALIDO)
             valores = [tupla[1] for tupla in self.mapaQbits]
             c = Cifrado(valores)
-            cifrado = c.cifrar(self.msg)
-            await self.send(cifrado)
+            try:
+                cifrado = c.cifrar(self.msg)
+                await self.send(cifrado)
+                print("Mensaje enviado")
+            except ValueError as e:
+                printerr(f"Error al cifrar el mensaje: {e}")
+                await self.close()
+                return
         else:
-            print("Valores de seguridad no coinciden, mensaje no enviado")
+            printerr("Valores de seguridad no coinciden, mensaje no enviado")
             await self.send(INVALIDO)
 
         await self.close()
