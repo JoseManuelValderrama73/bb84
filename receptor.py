@@ -2,12 +2,12 @@ from kernel import *
 import random
 
 class Receptor(CommunicationManager):
-    def __init__(self, N: int, port: int):
+    def __init__(self, port: int):
         super().__init__('server', '0.0.0.0', port)
-        self.N = N
         self.mapaQbits = []
 
     async def run(self):
+        N = await self.receive()
         qbits = await self.receive()
         self.generarMapaQbits(qbits)
         ejes = [tupla[0] for tupla in self.mapaQbits]
@@ -16,7 +16,7 @@ class Receptor(CommunicationManager):
         ejesEmisor = await self.receive()
         self.purgarMapa(ejesEmisor)
 
-        indices = random.sample(range(len(self.mapaQbits)), self.N)
+        indices = random.sample(range(len(self.mapaQbits)), N)
         valores_seguridad = [self.mapaQbits[i][1] for i in indices]
         await self.send(indices)
         await self.send(valores_seguridad)
@@ -28,7 +28,10 @@ class Receptor(CommunicationManager):
             c = Cifrado(valores)
             msg = c.descifrar(msg_cif)
 
-        print("mensaje recibido:", msg)
+        self.tratarMensaje(msg)
+
+    async def salir(self):
+        await self.close()
 
     def generarMapaQbits(self, qbits) -> list:
         for qbit in qbits:
@@ -41,3 +44,6 @@ class Receptor(CommunicationManager):
             if self.mapaQbits[i][0] == ejesReceptor[i]:
                 nuevoMapa.append(self.mapaQbits[i])
         self.mapaQbits = nuevoMapa
+    
+    def tratarMensaje(self, msg: str):
+        print("Mensaje recibido:", msg)

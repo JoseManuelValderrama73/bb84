@@ -9,6 +9,7 @@ class Emisor(CommunicationManager):
 
     async def run(self):
         await self.start()
+        await self.send(self.N)
 
         numQbits = len(self.msg) * N_BITS_FACTOR
         qbits = self.generarQbits(numQbits)
@@ -33,7 +34,7 @@ class Emisor(CommunicationManager):
             print("Valores de seguridad no coinciden, mensaje no enviado")
             await self.send(INVALIDO)
 
-        self.close()
+        await self.close()
         
     def generarQbits(self, numQbits: int) -> list:
         from kernel import Qbit
