@@ -57,14 +57,14 @@ class Qbit():
             return eje, random.choice([0, 1])
     
     def to_dict(self):
-        return {"bit": self.bit, "basis": self.basis}
+        return {"valor": self.valor, "eje": self.eje}
 
     @staticmethod
     def from_dict(data):
-        return Qbit(data["bit"], data["basis"])
+        return Qbit(data["valor"], data["eje"])
 
     def __repr__(self):
-        return f"Qubit(bit={self.bit}, basis='{self.basis}')"
+        return f"Qubit(valor={self.valor}, eje='{self.eje}')"
 
 import asyncio
 import json
