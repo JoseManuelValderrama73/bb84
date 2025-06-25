@@ -1,40 +1,39 @@
 from kernel import *
 
-class Emisor():
-    def __init__(self, msg: str, N: int):
+class Emisor(CommunicationManager):
+    def __init__(self, msg: str, N: int, host: str, port: int):
+        super().__init__('client', host, port)
         self.msg = msg
         self.N = N
         self.mapaQbits = []
-    
-    async def on_ready(self):
-        msg = await self.receive()
-        print("[B] Received:", msg)
-        await self.send("Hello from B!")
 
-"""
     async def run(self):
+        await self.start()
+
         numQbits = len(self.msg) * N_BITS_FACTOR
         qbits = self.generarQbits(numQbits)
-        await self.atob.put(qbits)
+        await self.send(qbits)
         ejes = [tupla[0] for tupla in self.mapaQbits]
 
-        await self.atob.put(ejes)
-        ejesReceptor = await self.btoa.get()
+        await self.send(ejes)
+        ejesReceptor = await self.receive()
         self.purgarMapa(ejesReceptor)
 
-        indices = await self.btoa.get()
-        valoresSeguridad = await self.btoa.get()
+        indices = await self.receive()
+        valoresSeguridad = await self.receive()
         # Use the same indices to extract values for comparison
         valores_emisor = [self.mapaQbits[i][1] for i in indices]
         if valores_emisor == valoresSeguridad:
-            await self.atob.put(VALIDO)
+            await self.send(VALIDO)
             valores = [tupla[1] for tupla in self.mapaQbits]
             c = Cifrado(valores)
             cifrado = c.cifrar(self.msg)
-            await self.atob.put(cifrado)
+            await self.send(cifrado)
         else:
             print("Valores de seguridad no coinciden, mensaje no enviado")
-            await self.atob.put(INVALIDO)
+            await self.send(INVALIDO)
+
+        self.close()
         
     def generarQbits(self, numQbits: int) -> list:
         from kernel import Qbit
@@ -58,4 +57,3 @@ class Emisor():
             if self.mapaQbits[i][1] != valoresSeguridad[i]:
                 return False
         return True
-"""

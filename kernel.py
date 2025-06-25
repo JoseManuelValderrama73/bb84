@@ -55,11 +55,24 @@ class Qbit():
             return eje, self.valor
         else:
             return eje, random.choice([0, 1])
+    
+    def to_dict(self):
+        return {"bit": self.bit, "basis": self.basis}
+
+    @staticmethod
+    def from_dict(data):
+        return Qbit(data["bit"], data["basis"])
+
+    def __repr__(self):
+        return f"Qubit(bit={self.bit}, basis='{self.basis}')"
 
 import asyncio
+import json
+from typing import List, Union
+
 class CommunicationManager:
     def __init__(self, mode, host, port):
-        self.mode = mode  # "client" or "server"
+        self.mode = mode
         self.host = host
         self.port = port
         self.reader = None
@@ -79,28 +92,56 @@ class CommunicationManager:
         self.reader = reader
         self.writer = writer
         print(f"[SERVER] Client connected.")
-        await self.on_ready()  # calls a hook for user code
+        await self.on_ready()
 
-    async def send(self, msg: str):
+    async def send(self, data):
         if self.writer is None:
             raise RuntimeError("Writer not initialized.")
-        self.writer.write((msg + "\n").encode())
+
+        if isinstance(data, str):
+            msg = {"type": "string", "data": data}
+        elif isinstance(data, int):
+            msg = {"type": "int", "data": data}
+        elif isinstance(data, list):
+            if all(isinstance(x, int) for x in data):
+                msg = {"type": "int_list", "data": data}
+            elif all(isinstance(x, Qubit) for x in data):
+                msg = {"type": "qbit_list", "data": [q.to_dict() for q in data]}
+            else:
+                raise ValueError("Unsupported list content")
+        else:
+            raise ValueError("Unsupported data type for send()")
+
+        serialized = json.dumps(msg) + "\n"
+        self.writer.write(serialized.encode())
         await self.writer.drain()
 
-    async def receive(self) -> str:
+    async def receive(self):
         if self.reader is None:
             raise RuntimeError("Reader not initialized.")
-        data = await self.reader.readline()
-        return data.decode().strip()
+
+        raw = await self.reader.readline()
+        message = json.loads(raw.decode())
+
+        t = message["type"]
+        d = message["data"]
+
+        if t == "string":
+            return d
+        elif t == "int":
+            return int(d)
+        elif t == "int_list":
+            return list(d)
+        elif t == "qbit_list":
+            return [Qubit.from_dict(q) for q in d]
+        else:
+            raise ValueError(f"Unknown message type: {t}")
 
     async def close(self):
         if self.writer:
             self.writer.close()
             await self.writer.wait_closed()
 
-    async def on_ready(self):
-        """
-        Hook: override this in subclass or assign externally
-        Called when connection is ready (for server)
-        """
+    async def run(self):
+        """Override in subclass or assign externally to define what happens on connect."""
         pass

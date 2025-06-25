@@ -7,28 +7,23 @@ class Receptor(CommunicationManager):
         self.N = N
         self.mapaQbits = []
 
-    async def on_ready(self):
-        msg = await self.receive()
-        print("[B] Received:", msg)
-        await self.send("Hello from B!")
-        """
     async def run(self):
-        qbits = await self.atob.get()
+        qbits = await self.receive()
         self.generarMapaQbits(qbits)
         ejes = [tupla[0] for tupla in self.mapaQbits]
 
-        await self.btoa.put(ejes)
-        ejesEmisor = await self.atob.get()
+        await self.send(ejes)
+        ejesEmisor = await self.receive()
         self.purgarMapa(ejesEmisor)
 
         indices = random.sample(range(len(self.mapaQbits)), self.N)
         valores_seguridad = [self.mapaQbits[i][1] for i in indices]
-        await self.btoa.put(indices)
-        await self.btoa.put(valores_seguridad)
+        await self.send(indices)
+        await self.send(valores_seguridad)
 
         msg = None
-        if (await self.atob.get() == VALIDO):
-            msg_cif = await self.atob.get()
+        if (await self.receive() == VALIDO):
+            msg_cif = await self.receive()
             valores = [tupla[1] for tupla in self.mapaQbits]
             c = Cifrado(valores)
             msg = c.descifrar(msg_cif)
@@ -46,4 +41,3 @@ class Receptor(CommunicationManager):
             if self.mapaQbits[i][0] == ejesReceptor[i]:
                 nuevoMapa.append(self.mapaQbits[i])
         self.mapaQbits = nuevoMapa
-"""

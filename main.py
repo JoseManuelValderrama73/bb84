@@ -3,21 +3,15 @@ from receptor import Receptor
 import asyncio
 from kernel import CommunicationManager
 
-async def run_client():
-    comm = CommunicationManager("client", "192.168.1.50", 8888)
-    await comm.start()
+async def servidor():
+    servidor = Receptor(10, 8888)
+    await servidor.start()
 
-    await comm.send("Hello from A!")
-    response = await comm.receive()
-    print("[A] Got:", response)
-
-    await comm.close()
-
-async def run_server():
-    server = Receptor(10, 8888)
-    await server.start()
+async def cliente():
+    cliente = Emisor("Hello, World!", 10, "192.168.1.50", 8888)
+    await cliente.run()
 
 if input("Run server? (y/n): ").strip().lower() == 'y':
-    asyncio.run(run_server())
+    asyncio.run(servidor())
 else:
-    asyncio.run(run_client())
+    asyncio.run(cliente())
