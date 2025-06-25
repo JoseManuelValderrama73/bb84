@@ -38,14 +38,9 @@ class Cifrado():
 
 import random
 class Qbit():
-    def __init__(self):
-        self.eje = None
-        self.valor = None
-
-    def generar(self) -> tuple:
-        self.eje = random.choice([0, 1])
-        self.valor = random.choice([0, 1])
-        return self.eje, self.valor
+    def __init__(self, eje: int, valor: int):
+        self.eje = eje
+        self.valor = valor
 
     def leer(self, eje: int) -> tuple:
         if (self.eje is None) or (self.valor is None):
@@ -61,7 +56,7 @@ class Qbit():
 
     @staticmethod
     def from_dict(data):
-        return Qbit(data["valor"], data["eje"])
+        return Qbit(data['eje'], data['valor'])
 
     def __repr__(self):
         return f"Qubit(valor={self.valor}, eje='{self.eje}')"

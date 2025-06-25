@@ -39,8 +39,8 @@ class Emisor(CommunicationManager):
         from kernel import Qbit
         qbits = []
         for _ in range(numQbits):
-            qbit = Qbit()
-            eje, valor = qbit.generar()
+            eje, valor = random.choice([0, 1]), random.choice([0, 1])
+            qbit = Qbit(eje, valor)
             qbits.append(qbit)
             self.mapaQbits.append((eje, valor))
         return qbits
