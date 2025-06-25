@@ -63,7 +63,7 @@ class Qbit():
 
 import asyncio
 import json
-from typing import List, Union
+import base64
 
 class CommunicationManager:
     def __init__(self, mode, host, port):
@@ -104,6 +104,10 @@ class CommunicationManager:
                 msg = {"type": "qbit_list", "data": [q.to_dict() for q in data]}
             else:
                 raise ValueError("Unsupported list content")
+        elif isinstance(data, bytes):
+            # Base64-encode the bytes before sending
+            b64_data = base64.b64encode(data).decode("ascii")
+            msg = {"type": "bytes", "data": b64_data}
         else:
             raise ValueError("Unsupported data type for send()")
 
@@ -129,6 +133,8 @@ class CommunicationManager:
             return list(d)
         elif t == "qbit_list":
             return [Qbit.from_dict(q) for q in d]
+        elif t == "bytes":
+            return base64.b64decode(d.encode("ascii"))
         else:
             raise ValueError(f"Unknown message type: {t}")
 
