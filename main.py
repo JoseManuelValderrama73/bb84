@@ -4,7 +4,7 @@ import asyncio
 from kernel import CommunicationManager
 
 async def run_client():
-    comm = CommunicationManager(mode="client", host="192.168.1.50", port=8888)
+    comm = CommunicationManager("client", "192.168.1.50", 8888)
     await comm.start()
 
     await comm.send("Hello from A!")
@@ -13,20 +13,9 @@ async def run_client():
 
     await comm.close()
 
-class Server(CommunicationManager):
-    async def on_ready(self):
-        msg = await self.receive()
-        print("[B] Received:", msg)
-        await self.send("Hello from B!")
-
 async def run_server():
-    server = Server(mode="server", host="0.0.0.0", port=8888)
+    server = Receptor(10, 8888)
     await server.start()
-"""
-async def run_server():
-    server = Emisor("hola mundo", 10, '0.0.0.0', 8888)
-    await server.start()
-"""
 
 if input("Run server? (y/n): ").strip().lower() == 'y':
     asyncio.run(run_server())

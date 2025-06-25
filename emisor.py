@@ -1,8 +1,7 @@
 from kernel import *
 
-class Emisor(CommunicationManager):
-    def __init__(self, msg: str, N: int, host: str, port: int):
-        CommunicationManager.__init__(self, 'server', host, port)
+class Emisor():
+    def __init__(self, msg: str, N: int):
         self.msg = msg
         self.N = N
         self.mapaQbits = []
@@ -12,6 +11,7 @@ class Emisor(CommunicationManager):
         print("[B] Received:", msg)
         await self.send("Hello from B!")
 
+"""
     async def run(self):
         numQbits = len(self.msg) * N_BITS_FACTOR
         qbits = self.generarQbits(numQbits)
@@ -58,3 +58,4 @@ class Emisor(CommunicationManager):
             if self.mapaQbits[i][1] != valoresSeguridad[i]:
                 return False
         return True
+"""

@@ -1,13 +1,17 @@
 from kernel import *
 import random
 
-class Receptor:
-    def __init__(self, N: int, atob, btoa):
+class Receptor(CommunicationManager):
+    def __init__(self, N: int, port: int):
+        super().__init__('server', '0.0.0.0', port)
         self.N = N
-        self.atob = atob
-        self.btoa = btoa
         self.mapaQbits = []
 
+    async def on_ready(self):
+        msg = await self.receive()
+        print("[B] Received:", msg)
+        await self.send("Hello from B!")
+        """
     async def run(self):
         qbits = await self.atob.get()
         self.generarMapaQbits(qbits)
@@ -42,3 +46,4 @@ class Receptor:
             if self.mapaQbits[i][0] == ejesReceptor[i]:
                 nuevoMapa.append(self.mapaQbits[i])
         self.mapaQbits = nuevoMapa
+"""

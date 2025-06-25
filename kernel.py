@@ -58,7 +58,7 @@ class Qbit():
 
 import asyncio
 class CommunicationManager:
-    def __init__(self, mode, host='127.0.0.1', port=8888):
+    def __init__(self, mode, host, port):
         self.mode = mode  # "client" or "server"
         self.host = host
         self.port = port
